@@ -60,6 +60,7 @@ main{max-width:760px;margin:0 auto;padding:0 16px calc(env(safe-area-inset-botto
 /* faixa de status */
 .faixa{display:flex;gap:8px;overflow-x:auto;padding:8px 16px 12px;margin:0 -16px;scrollbar-width:none;scroll-snap-type:x proximity}
 .faixa::-webkit-scrollbar{display:none}
+  @media (hover:hover) and (pointer:fine){.faixa{flex-wrap:wrap;overflow:visible;margin:0;padding:8px 0 12px;scroll-snap-type:none}}
 .etapa{flex:0 0 auto;scroll-snap-align:start;min-width:92px;padding:10px 12px 10px;border-radius:14px;border:1px solid var(--line);
   background:var(--surface);text-align:left;position:relative;overflow:hidden}
 .etapa::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--cor,var(--line))}
