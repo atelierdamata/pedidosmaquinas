@@ -86,6 +86,12 @@ main{max-width:760px;margin:0 auto;padding:0 16px calc(env(safe-area-inset-botto
 .tags span{font-size:12px;line-height:1;padding:5px 7px;border-radius:8px;background:var(--surface-2);color:var(--ink);white-space:nowrap}
 .tags span i{font-style:normal;color:var(--muted)}
 .item .compra{color:var(--muted);font-weight:500}
+.compra-lista{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.compra-lista li{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;
+  background:color-mix(in srgb,var(--erro) 10%,var(--surface));border:1px solid color-mix(in srgb,var(--erro) 30%,transparent)}
+.compra-lista li b{flex:1;font-weight:800}
+.compra-lista li span{font-size:13px;color:var(--erro);font-weight:700}
+.compra-ok{margin:0;padding:12px;border-radius:12px;background:color-mix(in srgb,var(--folha) 12%,var(--surface));font-weight:600}
 .tags span.alerta{background:color-mix(in srgb,var(--erro) 16%,transparent);color:var(--erro);font-weight:700}
 .tags span.aviso-preco{background:color-mix(in srgb,var(--ambar) 18%,transparent);color:var(--ambar);font-weight:700}
 .faixa-alerta{display:flex;gap:10px;align-items:center;padding:12px 14px;border-radius:14px;margin-bottom:14px;font-size:14px;font-weight:600;
@@ -179,7 +185,7 @@ thead th{font-size:12px;color:var(--muted);font-weight:700}
 tfoot td{font-weight:800;border-bottom:0}
 .zero{color:var(--muted);opacity:.6}
 .kpis{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-.kpis div b{display:block;font-size:24px;font-weight:800;letter-spacing:-.02em}
+.kpis div b{display:block;font-size:18px;font-weight:800;letter-spacing:-.02em}
 .kpis div span{font-size:13px;color:var(--muted)}
 .nota{font-size:13px;color:var(--muted);margin:10px 0 0}
 .barras{display:grid;gap:8px}
@@ -829,10 +835,17 @@ function renderResumo(){
     const t = pedidos.filter(p=>p.modelo===m); const v = vendas.filter(p=>p.modelo===m);
     return { m, qtd:t.length, fat:v.reduce((a,p)=>a+p.preco,0), mg:v.reduce((a,p)=>a+p.preco-custoTotal(p),0) };
   });
-  const porLocal = (listas.entregas||[]).map(l => ({ l, qtd: pedidos.filter(p=>p.entrega===l).length }));
+  // necessidade de compra: modelo + cor sem nenhuma máquina em estoque nem a caminho
+  const comprar = [];
+  modelos.forEach(m => cores.forEach(cr => { if (!cel(emEstoque,m,cr) && !cel(aCaminho,m,cr)) comprar.push(`${m} ${cr}`); }));
 
   $('#telaResumo').innerHTML = `
     ${c.atrasados ? `<button class="faixa-alerta cheio" data-ir="atrasados" style="--cor:var(--erro);width:100%;text-align:left;cursor:pointer">⏰ <span><b>${c.atrasados} ${c.atrasados===1?'pedido atrasado':'pedidos atrasados'}</b>: a chegada estimada já passou. Ver pedidos</span></button>` : ''}
+    <section class="cartao"><h2>Necessidade de compra</h2>
+      ${comprar.length ? `<ul class="compra-lista">${comprar.map(x => `<li><b>${esc(x)}</b><span>zerado</span></li>`).join('')}</ul>
+      <p class="nota">${comprar.length} ${comprar.length===1?'combinação':'combinações'} de modelo e cor sem nenhuma máquina em estoque nem a caminho.</p>`
+      : `<p class="compra-ok">Todos os modelos e cores têm máquina em estoque ou a caminho.</p>`}
+    </section>
     <section class="cartao"><h2>Em estoque agora</h2>${tabela(emEstoque)}</section>
     ${aCaminho.length ? `<section class="cartao"><h2>A caminho para o estoque</h2>${tabela(aCaminho)}
       <p class="nota">Pedidos com “Estoque” no cliente que ainda não chegaram.</p></section>` : ''}
@@ -853,10 +866,7 @@ function renderResumo(){
     <section class="cartao"><h2>Por modelo</h2><div class="tab-wrap"><table class="num">
       <thead><tr><th>Modelo</th><th>Qtd</th><th>Faturamento</th><th>Margem</th></tr></thead>
       <tbody>${porModelo.map(r=>`<tr><td>${esc(r.m)}</td><td>${r.qtd}</td><td>${r.fat?brl(r.fat):'—'}</td><td>${r.mg?brl(r.mg):'—'}</td></tr>`).join('')}</tbody>
-    </table></div></section>
-    <section class="cartao"><h2>Por local de entrega</h2><div class="kpis num">
-      ${porLocal.map(r=>`<div><b>${r.qtd}</b><span>${esc(r.l)}</span></div>`).join('')}
-    </div></section>`;
+    </table></div></section>`;
 }
 
 /* ---------- configuração ---------- */
